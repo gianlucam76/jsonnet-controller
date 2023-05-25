@@ -1,0 +1,16 @@
+domain: projectsveltos.io
+layout:
+- go.kubebuilder.io/v3
+projectName: jsonnet-controller
+repo: github.com/gianlucam76/jsonnet-controller
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: projectsveltos.io
+  group: extension
+  kind: JsonnetSource
+  path: github.com/gianlucam76/jsonnet-controller/api/v1alpha1
+  version: v1alpha1
+version: "3"
