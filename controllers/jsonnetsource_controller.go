@@ -160,11 +160,25 @@ func (r *JsonnetSourceReconciler) reconcileNormal(
 	}
 
 	vm := jsonnet.MakeVM()
+
+	var subdirectories []string
+	subdirectories, err = getAllSubdirectories(filepath.Dir(filePath))
+	if err != nil {
+		logger.V(logs.LogInfo).Info(fmt.Sprintf("Failed to get subdirectories in %s: %v\n",
+			tmpDir, err))
+		return "", err
+	}
+
+	for _, subdir := range subdirectories {
+		logger.V(logs.LogDebug).Info(fmt.Sprintf("including subdirectory: %s", subdir))
+	}
+
 	vm.Importer(&jsonnet.FileImporter{
-		JPaths: []string{tmpDir},
+		JPaths: subdirectories,
 	})
 
 	for key, value := range jsonnetSource.Spec.Variables {
+		logger.V(logs.LogDebug).Info(fmt.Sprintf("setting variable: %s:%s", key, value))
 		vm.ExtVar(key, value)
 	}
 
@@ -532,4 +546,27 @@ func processData(jsonData string) (string, error) {
 	}
 
 	return result, nil
+}
+
+func getAllSubdirectories(directory string) ([]string, error) {
+	var subdirectories []string
+	subdirectories = append(subdirectories, directory)
+
+	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() && path != directory {
+			subdirectories = append(subdirectories, path)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return subdirectories, nil
 }
