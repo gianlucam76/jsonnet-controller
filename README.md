@@ -8,10 +8,15 @@ process those files programmatically invoking jsonnet go module and store the ou
 
 ## Install
 
+```bash
 kubectl apply -f https://raw.githubusercontent.com/gianlucam76/jsonnet-controller/main/manifest/manifest.yaml
+```
+
 or if you want a specific version
 
+```bash
 kubectl apply -f https://raw.githubusercontent.com/gianlucam76/jsonnet-controller/<tag>/manifest/manifest.yaml
+```
 
 ## Contributing
 
