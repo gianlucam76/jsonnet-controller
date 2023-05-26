@@ -47,7 +47,7 @@ type JsonnetSourceSpec struct {
 	Path string `json:"path,omitempty"`
 
 	// Variables contains set of variable to pass to jsonnet
-	Variables map[string]string `json:"data,omitempty"`
+	Variables map[string]string `json:"variables,omitempty"`
 }
 
 // JsonnetSourceStatus defines the observed state of JsonnetSource

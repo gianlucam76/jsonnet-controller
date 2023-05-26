@@ -40,11 +40,6 @@ spec:
           spec:
             description: JsonnetSourceSpec defines the desired state of JsonnetSource
             properties:
-              data:
-                additionalProperties:
-                  type: string
-                description: Variables contains set of variable to pass to jsonnet
-                type: object
               kind:
                 description: 'Kind of the resource. Supported kinds are: - flux GitRepository;OCIRepository;Bucket
                   - ConfigMap/Secret (which will be mounted as volume)'
@@ -68,6 +63,11 @@ spec:
                 description: Path to the jsonnet file. Defaults to 'None', which translates
                   to the root path of the SourceRef.
                 type: string
+              variables:
+                additionalProperties:
+                  type: string
+                description: Variables contains set of variable to pass to jsonnet
+                type: object
             required:
             - kind
             - name
