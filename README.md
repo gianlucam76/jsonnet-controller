@@ -168,7 +168,7 @@ status:
     {"apiVersion":"v1","kind":"Service","metadata":{"name":"my-service","namespace":"production"},"spec":{"ports":[{"port":80,"protocol":"TCP","targetPort":8080}],"selector":{"app":"my-app"},"type":"LoadBalancer"}}
 ```
 
-At this point [Sveltos addon-manager](https://github.com/projectsveltos/addon-manager) to use the output of the jsonnet-controller and deploy those resources in all selected managed clusters. To know more refer to [Sveltos documentation](https://projectsveltos.github.io/sveltos/ytt_extension/)
+At this point [Sveltos Kubernetes addon controller](https://github.com/projectsveltos/addon-controller) to use the output of the jsonnet-controller and deploy those resources in all selected managed clusters. To know more refer to [Sveltos documentation](https://projectsveltos.github.io/sveltos/ytt_extension/)
 
 ## Contributing 
 
