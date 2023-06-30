@@ -219,7 +219,7 @@ func (r *JsonnetSourceReconciler) SetupWithManager(mgr ctrl.Manager,
 
 	// When ConfigMap changes, according to ConfigMapPredicates,
 	// one or more ClusterSummaries need to be reconciled.
-	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}),
 		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
 		ConfigMapPredicates(mgr.GetLogger().WithValues("predicate", "configmappredicate")),
 	)
@@ -229,7 +229,7 @@ func (r *JsonnetSourceReconciler) SetupWithManager(mgr ctrl.Manager,
 
 	// When Secret changes, according to SecretPredicates,
 	// one or more ClusterSummaries need to be reconciled.
-	err = c.Watch(&source.Kind{Type: &corev1.Secret{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{}),
 		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
 		SecretPredicates(mgr.GetLogger().WithValues("predicate", "secretpredicate")),
 	)
@@ -241,7 +241,7 @@ func (r *JsonnetSourceReconciler) WatchForFlux(mgr ctrl.Manager, c controller.Co
 	// When a Flux source (GitRepository/OCIRepository/Bucket) changes, one or more ClusterSummaries
 	// need to be reconciled.
 
-	err := c.Watch(&source.Kind{Type: &sourcev1.GitRepository{}},
+	err := c.Watch(source.Kind(mgr.GetCache(), &sourcev1.GitRepository{}),
 		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
 		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
 	)
@@ -249,7 +249,7 @@ func (r *JsonnetSourceReconciler) WatchForFlux(mgr ctrl.Manager, c controller.Co
 		return err
 	}
 
-	err = c.Watch(&source.Kind{Type: &sourcev1b2.OCIRepository{}},
+	err = c.Watch(source.Kind(mgr.GetCache(), &sourcev1b2.OCIRepository{}),
 		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
 		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
 	)
@@ -257,7 +257,7 @@ func (r *JsonnetSourceReconciler) WatchForFlux(mgr ctrl.Manager, c controller.Co
 		return err
 	}
 
-	return c.Watch(&source.Kind{Type: &sourcev1b2.Bucket{}},
+	return c.Watch(source.Kind(mgr.GetCache(), &sourcev1b2.Bucket{}),
 		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
 		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
 	)
