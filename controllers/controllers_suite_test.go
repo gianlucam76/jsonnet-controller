@@ -7,6 +7,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/klog/v2"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 var (
@@ -20,6 +22,8 @@ func TestControllers(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	By("bootstrapping test environment")
+
+	ctrl.SetLogger(klog.Background())
 
 	var err error
 	scheme, err = setupScheme()
