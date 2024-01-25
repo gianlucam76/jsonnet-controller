@@ -97,44 +97,6 @@ metadata:
   namespace: jsonnet-system
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: jsonnet-leader-election-role
-  namespace: jsonnet-system
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - get
-  - list
-  - watch
-  - create
-  - update
-  - patch
-  - delete
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: jsonnet-manager-role
@@ -267,20 +229,6 @@ rules:
   - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: jsonnet-leader-election-rolebinding
-  namespace: jsonnet-system
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: jsonnet-leader-election-role
-subjects:
-- kind: ServiceAccount
-  name: jsonnet-controller
-  namespace: jsonnet-system
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: jsonnet-manager-rolebinding
@@ -374,7 +322,6 @@ spec:
       - args:
         - --health-probe-bind-address=:8081
         - --metrics-bind-address=127.0.0.1:8080
-        - --leader-elect
         - --v=5
         command:
         - /manager
