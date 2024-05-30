@@ -21,8 +21,8 @@ var (
 )
 
 var (
-	RequeueJsonnetSourceForReference   = (*JsonnetSourceReconciler).requeueJsonnetSourceForReference
-	RequeueJsonnetSourceForFluxSources = (*JsonnetSourceReconciler).requeueJsonnetSourceForFluxSources
+	RequeueJsonnetSourceForReference         = (*JsonnetSourceReconciler).requeueJsonnetSourceForReference
+	RequeueJsonnetSourceForFluxGitRepository = (*JsonnetSourceReconciler).requeueJsonnetSourceForFluxGitRepository
 )
 
 var (
