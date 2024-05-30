@@ -174,7 +174,7 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name})
 		reconciler.ReferenceMap[key] = &set
 
-		requests := controllers.RequeueJsonnetSourceForFluxSources(reconciler, context.TODO(), gitRepo)
+		requests := controllers.RequeueJsonnetSourceForFluxGitRepository(reconciler, context.TODO(), gitRepo)
 		Expect(requests).To(HaveLen(1))
 		Expect(requests[0].Name).To(Equal(JsonnetSource0.Name))
 		Expect(requests[0].Namespace).To(Equal(JsonnetSource0.Namespace))
@@ -183,7 +183,7 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource1.Namespace, Name: JsonnetSource1.Name})
 		reconciler.ReferenceMap[key] = &set
 
-		requests = controllers.RequeueJsonnetSourceForFluxSources(reconciler, context.TODO(), gitRepo)
+		requests = controllers.RequeueJsonnetSourceForFluxGitRepository(reconciler, context.TODO(), gitRepo)
 		Expect(requests).To(HaveLen(2))
 		Expect(requests).To(ContainElement(
 			reconcile.Request{NamespacedName: types.NamespacedName{Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name}}))

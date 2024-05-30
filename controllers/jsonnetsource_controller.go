@@ -41,6 +41,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/cluster-api/util/patch"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -212,27 +213,22 @@ func (r *JsonnetSourceReconciler) SetupWithManager(mgr ctrl.Manager,
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: 5,
 		}).
+		Watches(&corev1.ConfigMap{},
+			handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
+			builder.WithPredicates(
+				ConfigMapPredicates(mgr.GetLogger().WithValues("predicate", "configmappredicate")),
+			),
+		).
+		Watches(&corev1.Secret{},
+			handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
+			builder.WithPredicates(
+				SecretPredicates(mgr.GetLogger().WithValues("predicate", "secretpredicate")),
+			),
+		).
 		Build(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating controller")
 	}
-
-	// When ConfigMap changes, according to ConfigMapPredicates,
-	// one or more ClusterSummaries need to be reconciled.
-	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.ConfigMap{}),
-		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
-		ConfigMapPredicates(mgr.GetLogger().WithValues("predicate", "configmappredicate")),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// When Secret changes, according to SecretPredicates,
-	// one or more ClusterSummaries need to be reconciled.
-	err = c.Watch(source.Kind(mgr.GetCache(), &corev1.Secret{}),
-		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForReference),
-		SecretPredicates(mgr.GetLogger().WithValues("predicate", "secretpredicate")),
-	)
 
 	return c, err
 }
@@ -241,26 +237,37 @@ func (r *JsonnetSourceReconciler) WatchForFlux(mgr ctrl.Manager, c controller.Co
 	// When a Flux source (GitRepository/OCIRepository/Bucket) changes, one or more ClusterSummaries
 	// need to be reconciled.
 
-	err := c.Watch(source.Kind(mgr.GetCache(), &sourcev1.GitRepository{}),
-		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
-		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
+	sourceGitRepository := source.Kind[*sourcev1.GitRepository](
+		mgr.GetCache(),
+		&sourcev1.GitRepository{},
+		handler.TypedEnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxGitRepository),
+		FluxGitRepositoryPredicate{Logger: mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")},
 	)
-	if err != nil {
+	if err := c.Watch(sourceGitRepository); err != nil {
 		return err
 	}
 
-	err = c.Watch(source.Kind(mgr.GetCache(), &sourcev1b2.OCIRepository{}),
-		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
-		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
+	sourceOCIRepository := source.Kind[*sourcev1b2.OCIRepository](
+		mgr.GetCache(),
+		&sourcev1b2.OCIRepository{},
+		handler.TypedEnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxOCIRepository),
+		FluxOCIRepositoryPredicate{Logger: mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")},
 	)
-	if err != nil {
+	if err := c.Watch(sourceOCIRepository); err != nil {
 		return err
 	}
 
-	return c.Watch(source.Kind(mgr.GetCache(), &sourcev1b2.Bucket{}),
-		handler.EnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxSources),
-		FluxSourcePredicates(r.Scheme, mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")),
+	sourceBucket := source.Kind[*sourcev1b2.Bucket](
+		mgr.GetCache(),
+		&sourcev1b2.Bucket{},
+		handler.TypedEnqueueRequestsFromMapFunc(r.requeueJsonnetSourceForFluxBucket),
+		FluxBucketPredicate{Logger: mgr.GetLogger().WithValues("predicate", "fluxsourcepredicate")},
 	)
+	if err := c.Watch(sourceBucket); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *JsonnetSourceReconciler) getReferenceMapForEntry(entry *corev1.ObjectReference) *libsveltosset.Set {
@@ -428,12 +435,11 @@ func prepareFileSystemWithFluxSource(ctx context.Context, c client.Client,
 		return "", err
 	}
 
-	artifactFetcher := fetch.NewArchiveFetcher(
-		1,
-		tar.UnlimitedUntarSize,
-		tar.UnlimitedUntarSize,
-		os.Getenv("SOURCE_CONTROLLER_LOCALHOST"),
-	)
+	artifactFetcher := fetch.New(
+		fetch.WithRetries(1),
+		fetch.WithMaxDownloadSize(tar.UnlimitedUntarSize),
+		fetch.WithUntar(tar.WithMaxUntarSize(tar.UnlimitedUntarSize)),
+		fetch.WithHostnameOverwrite(os.Getenv("SOURCE_CONTROLLER_LOCALHOST")))
 
 	// Download artifact and extract files to the tmp dir.
 	err = artifactFetcher.Fetch(fluxSource.GetArtifact().URL, fluxSource.GetArtifact().Digest, tmpDir)
