@@ -25,11 +25,11 @@ kubectl apply -f https://raw.githubusercontent.com/gianlucam76/jsonnet-controlle
 ## Using Flux GitRepository
 
 For instance, this Github repository https://github.com/gianlucam76/jsonnet-examples contains jsonnet files. 
-You can use Flux to sync from it and then simply post this [JsonnetSource](https://github.com/gianlucam76/jsonnet-controller/blob/main/api/v1alpha1/jsonnetsource_types.go) CRD instance.
+You can use Flux to sync from it and then simply post this [JsonnetSource](https://github.com/gianlucam76/jsonnet-controller/blob/main/api/v1beta1/jsonnetsource_types.go) CRD instance.
 The jsonnet-controller will detect when Flux has synced the repo (and anytime there is a change), will programatically invoke jsonnet go module and store the outcome in its Status.Resources field.
 
 ```yaml
-apiVersion: extension.projectsveltos.io/v1alpha1
+apiVersion: extension.projectsveltos.io/v1beta1
 kind: JsonnetSource
 metadata:
   name: jsonnetsource-flux
@@ -45,12 +45,12 @@ spec:
 ```
 
 ```yaml
-apiVersion: extension.projectsveltos.io/v1alpha1
+apiVersion: extension.projectsveltos.io/v1beta1
 kind: JsonnetSource
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"extension.projectsveltos.io/v1alpha1","kind":"JsonnetSource","metadata":{"annotations":{},"name":"jsonnetsource-flux","namespace":"default"},"spec":{"kind":"GitRepository","name":"flux-system","namespace":"flux-system","path":"./variables/deployment.jsonnet","variables":{"deploymentName":"eng","namespace":"staging","replicas":"3"}}}
+      {"apiVersion":"extension.projectsveltos.io/v1beta1","kind":"JsonnetSource","metadata":{"annotations":{},"name":"jsonnetsource-flux","namespace":"default"},"spec":{"kind":"GitRepository","name":"flux-system","namespace":"flux-system","path":"./variables/deployment.jsonnet","variables":{"deploymentName":"eng","namespace":"staging","replicas":"3"}}}
   creationTimestamp: "2023-05-26T06:55:13Z"
   generation: 3
   name: jsonnetsource-flux
@@ -74,7 +74,7 @@ status:
 Sveltos can used at this point to deploy resources in managed clusters:
 
 ```yaml
-apiVersion: config.projectsveltos.io/v1alpha1
+apiVersion: config.projectsveltos.io/v1beta1
 kind: ClusterProfile
 metadata:
   name: deploy-resources
@@ -82,7 +82,7 @@ spec:
   clusterSelector: env=fv
   templateResourceRefs:
   - resource:
-      apiVersion: extension.projectsveltos.io/v1alpha1
+      apiVersion: extension.projectsveltos.io/v1beta1
       kind: JsonnetSource
       name: jsonnetsource-flux
       namespace: default
@@ -125,7 +125,7 @@ kubectl create configmap jsonnet --from-file=jsonnet.tar.gz=jsonnet.tar.gz
 Then we can have JsonnetSource reference this ConfigMap instance
 
 ```yaml
-apiVersion: extension.projectsveltos.io/v1alpha1
+apiVersion: extension.projectsveltos.io/v1beta1
 kind: JsonnetSource
 metadata:
   name: jsonnetsource-configmap
@@ -141,12 +141,12 @@ spec:
 and the controller will programmatically execute jsonnet go module and store the outcome in Status.Results.
 
 ```yaml
-apiVersion: extension.projectsveltos.io/v1alpha1
+apiVersion: extension.projectsveltos.io/v1beta1
 kind: JsonnetSource
 metadata:
   annotations:
     kubectl.kubernetes.io/last-applied-configuration: |
-      {"apiVersion":"extension.projectsveltos.io/v1alpha1","kind":"JsonnetSource","metadata":{"annotations":{},"name":"jsonnetsource-configmap","namespace":"default"},"spec":{"kind":"ConfigMap","name":"jsonnet","namespace":"default","path":"./main.jsonnet","variables":{"namespace":"production"}}}
+      {"apiVersion":"extension.projectsveltos.io/v1beta1","kind":"JsonnetSource","metadata":{"annotations":{},"name":"jsonnetsource-configmap","namespace":"default"},"spec":{"kind":"ConfigMap","name":"jsonnet","namespace":"default","path":"./main.jsonnet","variables":{"namespace":"production"}}}
   creationTimestamp: "2023-05-26T08:28:48Z"
   generation: 1
   name: jsonnetsource-configmap

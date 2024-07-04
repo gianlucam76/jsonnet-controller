@@ -31,10 +31,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	extensionv1alpha1 "github.com/gianlucam76/jsonnet-controller/api/v1alpha1"
+	extensionv1beta1 "github.com/gianlucam76/jsonnet-controller/api/v1beta1"
 	"github.com/gianlucam76/jsonnet-controller/controllers"
 
-	libsveltosv1alpha1 "github.com/projectsveltos/libsveltos/api/v1alpha1"
+	libsveltosv1beta1 "github.com/projectsveltos/libsveltos/api/v1beta1"
 	libsveltosset "github.com/projectsveltos/libsveltos/lib/set"
 )
 
@@ -49,27 +49,27 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 
 		controllers.AddTypeInformationToObject(scheme, configMap)
 
-		JsonnetSource0 := &extensionv1alpha1.JsonnetSource{
+		JsonnetSource0 := &extensionv1beta1.JsonnetSource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      randomString(),
 				Namespace: randomString(),
 			},
-			Spec: extensionv1alpha1.JsonnetSourceSpec{
+			Spec: extensionv1beta1.JsonnetSourceSpec{
 				Namespace: configMap.Namespace,
 				Name:      configMap.Name,
-				Kind:      string(libsveltosv1alpha1.ConfigMapReferencedResourceKind),
+				Kind:      string(libsveltosv1beta1.ConfigMapReferencedResourceKind),
 			},
 		}
 
-		JsonnetSource1 := &extensionv1alpha1.JsonnetSource{
+		JsonnetSource1 := &extensionv1beta1.JsonnetSource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      randomString(),
 				Namespace: randomString(),
 			},
-			Spec: extensionv1alpha1.JsonnetSourceSpec{
+			Spec: extensionv1beta1.JsonnetSourceSpec{
 				Namespace: randomString(),
 				Name:      configMap.Name,
-				Kind:      string(libsveltosv1alpha1.ConfigMapReferencedResourceKind),
+				Kind:      string(libsveltosv1beta1.ConfigMapReferencedResourceKind),
 			},
 		}
 
@@ -91,10 +91,10 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 
 		set := libsveltosset.Set{}
 		key := corev1.ObjectReference{APIVersion: configMap.APIVersion,
-			Kind: string(libsveltosv1alpha1.ConfigMapReferencedResourceKind), Namespace: configMap.Namespace, Name: configMap.Name}
+			Kind: string(libsveltosv1beta1.ConfigMapReferencedResourceKind), Namespace: configMap.Namespace, Name: configMap.Name}
 
-		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1alpha1.GroupVersion.String(),
-			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name})
+		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1beta1.GroupVersion.String(),
+			Kind: extensionv1beta1.JsonnetSourceKind, Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name})
 		reconciler.ReferenceMap[key] = &set
 
 		requests := controllers.RequeueJsonnetSourceForReference(reconciler, context.TODO(), configMap)
@@ -102,8 +102,8 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 		Expect(requests[0].Name).To(Equal(JsonnetSource0.Name))
 		Expect(requests[0].Namespace).To(Equal(JsonnetSource0.Namespace))
 
-		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1alpha1.GroupVersion.String(),
-			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource1.Namespace, Name: JsonnetSource1.Name})
+		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1beta1.GroupVersion.String(),
+			Kind: extensionv1beta1.JsonnetSourceKind, Namespace: JsonnetSource1.Namespace, Name: JsonnetSource1.Name})
 		reconciler.ReferenceMap[key] = &set
 
 		requests = controllers.RequeueJsonnetSourceForReference(reconciler, context.TODO(), configMap)
@@ -126,24 +126,24 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 
 		controllers.AddTypeInformationToObject(scheme, gitRepo)
 
-		JsonnetSource0 := &extensionv1alpha1.JsonnetSource{
+		JsonnetSource0 := &extensionv1beta1.JsonnetSource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      randomString(),
 				Namespace: randomString(),
 			},
-			Spec: extensionv1alpha1.JsonnetSourceSpec{
+			Spec: extensionv1beta1.JsonnetSourceSpec{
 				Namespace: gitRepo.Namespace,
 				Name:      gitRepo.Name,
 				Kind:      sourcev1.GitRepositoryKind,
 			},
 		}
 
-		JsonnetSource1 := &extensionv1alpha1.JsonnetSource{
+		JsonnetSource1 := &extensionv1beta1.JsonnetSource{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      randomString(),
 				Namespace: randomString(),
 			},
-			Spec: extensionv1alpha1.JsonnetSourceSpec{
+			Spec: extensionv1beta1.JsonnetSourceSpec{
 				Namespace: gitRepo.Namespace,
 				Name:      randomString(),
 				Kind:      sourcev1.GitRepositoryKind,
@@ -170,8 +170,8 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 		key := corev1.ObjectReference{APIVersion: gitRepo.APIVersion,
 			Kind: sourcev1.GitRepositoryKind, Namespace: gitRepo.Namespace, Name: gitRepo.Name}
 
-		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1alpha1.GroupVersion.String(),
-			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name})
+		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1beta1.GroupVersion.String(),
+			Kind: extensionv1beta1.JsonnetSourceKind, Namespace: JsonnetSource0.Namespace, Name: JsonnetSource0.Name})
 		reconciler.ReferenceMap[key] = &set
 
 		requests := controllers.RequeueJsonnetSourceForFluxGitRepository(reconciler, context.TODO(), gitRepo)
@@ -179,8 +179,8 @@ var _ = Describe("JsonnetSourceTransformation map functions", func() {
 		Expect(requests[0].Name).To(Equal(JsonnetSource0.Name))
 		Expect(requests[0].Namespace).To(Equal(JsonnetSource0.Namespace))
 
-		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1alpha1.GroupVersion.String(),
-			Kind: extensionv1alpha1.JsonnetSourceKind, Namespace: JsonnetSource1.Namespace, Name: JsonnetSource1.Name})
+		set.Insert(&corev1.ObjectReference{APIVersion: extensionv1beta1.GroupVersion.String(),
+			Kind: extensionv1beta1.JsonnetSourceKind, Namespace: JsonnetSource1.Namespace, Name: JsonnetSource1.Name})
 		reconciler.ReferenceMap[key] = &set
 
 		requests = controllers.RequeueJsonnetSourceForFluxGitRepository(reconciler, context.TODO(), gitRepo)

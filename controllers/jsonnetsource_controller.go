@@ -30,7 +30,7 @@ import (
 	sourcev1 "github.com/fluxcd/source-controller/api/v1"
 	sourcev1b2 "github.com/fluxcd/source-controller/api/v1beta2"
 	"github.com/ghodss/yaml"
-	extensionv1alpha1 "github.com/gianlucam76/jsonnet-controller/api/v1alpha1"
+	extensionv1beta1 "github.com/gianlucam76/jsonnet-controller/api/v1beta1"
 	"github.com/go-logr/logr"
 	"github.com/google/go-jsonnet"
 	"github.com/pkg/errors"
@@ -48,7 +48,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
-	libsveltosv1alpha1 "github.com/projectsveltos/libsveltos/api/v1alpha1"
+	libsveltosv1beta1 "github.com/projectsveltos/libsveltos/api/v1beta1"
 	logs "github.com/projectsveltos/libsveltos/lib/logsettings"
 	libsveltosset "github.com/projectsveltos/libsveltos/lib/set"
 )
@@ -81,7 +81,7 @@ func (r *JsonnetSourceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	logger.V(logs.LogInfo).Info("Reconciling")
 
 	// Fecth the JsonnetSource instance
-	jsonnetSource := &extensionv1alpha1.JsonnetSource{}
+	jsonnetSource := &extensionv1beta1.JsonnetSource{}
 	if err := r.Get(ctx, req.NamespacedName, jsonnetSource); err != nil {
 		if apierrors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -133,7 +133,7 @@ func (r *JsonnetSourceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 func (r *JsonnetSourceReconciler) reconcileNormal(
 	ctx context.Context,
-	jsonnetSource *extensionv1alpha1.JsonnetSource,
+	jsonnetSource *extensionv1beta1.JsonnetSource,
 	logger logr.Logger,
 ) (string, error) {
 
@@ -209,7 +209,7 @@ func (r *JsonnetSourceReconciler) SetupWithManager(mgr ctrl.Manager,
 ) (controller.Controller, error) {
 
 	c, err := ctrl.NewControllerManagedBy(mgr).
-		For(&extensionv1alpha1.JsonnetSource{}).
+		For(&extensionv1beta1.JsonnetSource{}).
 		WithOptions(controller.Options{
 			MaxConcurrentReconciles: 5,
 		}).
@@ -279,7 +279,7 @@ func (r *JsonnetSourceReconciler) getReferenceMapForEntry(entry *corev1.ObjectRe
 	return s
 }
 
-func (r *JsonnetSourceReconciler) getCurrentReference(jsonnetSource *extensionv1alpha1.JsonnetSource) *corev1.ObjectReference {
+func (r *JsonnetSourceReconciler) getCurrentReference(jsonnetSource *extensionv1beta1.JsonnetSource) *corev1.ObjectReference {
 	return &corev1.ObjectReference{
 		APIVersion: getReferenceAPIVersion(jsonnetSource),
 		Kind:       jsonnetSource.Spec.Kind,
@@ -288,7 +288,7 @@ func (r *JsonnetSourceReconciler) getCurrentReference(jsonnetSource *extensionv1
 	}
 }
 
-func (r *JsonnetSourceReconciler) updateMaps(jsonnetSource *extensionv1alpha1.JsonnetSource, logger logr.Logger) {
+func (r *JsonnetSourceReconciler) updateMaps(jsonnetSource *extensionv1beta1.JsonnetSource, logger logr.Logger) {
 	logger.V(logs.LogDebug).Info("update policy map")
 	ref := r.getCurrentReference(jsonnetSource)
 
@@ -321,7 +321,7 @@ func (r *JsonnetSourceReconciler) updateMaps(jsonnetSource *extensionv1alpha1.Js
 	r.JsonnetSourceMap[JsonnetSourceName] = currentReference
 }
 
-func (r *JsonnetSourceReconciler) cleanMaps(jsonnetSource *extensionv1alpha1.JsonnetSource) {
+func (r *JsonnetSourceReconciler) cleanMaps(jsonnetSource *extensionv1beta1.JsonnetSource) {
 	r.PolicyMux.Lock()
 	defer r.PolicyMux.Unlock()
 
@@ -336,13 +336,13 @@ func (r *JsonnetSourceReconciler) cleanMaps(jsonnetSource *extensionv1alpha1.Jso
 }
 
 func (r *JsonnetSourceReconciler) prepareFileSystem(ctx context.Context,
-	jsonnetSource *extensionv1alpha1.JsonnetSource, logger logr.Logger) (string, error) {
+	jsonnetSource *extensionv1beta1.JsonnetSource, logger logr.Logger) (string, error) {
 
 	ref := r.getCurrentReference(jsonnetSource)
 
-	if ref.Kind == string(libsveltosv1alpha1.ConfigMapReferencedResourceKind) {
+	if ref.Kind == string(libsveltosv1beta1.ConfigMapReferencedResourceKind) {
 		return prepareFileSystemWithConfigMap(ctx, r.Client, ref, logger)
-	} else if ref.Kind == string(libsveltosv1alpha1.SecretReferencedResourceKind) {
+	} else if ref.Kind == string(libsveltosv1beta1.SecretReferencedResourceKind) {
 		return prepareFileSystemWithSecret(ctx, r.Client, ref, logger)
 	}
 
@@ -496,7 +496,7 @@ func getSource(ctx context.Context, c client.Client, ref *corev1.ObjectReference
 }
 
 // Close closes the current scope persisting the JsonnetSource status.
-func (s *JsonnetSourceReconciler) Close(ctx context.Context, jsonnetSource *extensionv1alpha1.JsonnetSource,
+func (s *JsonnetSourceReconciler) Close(ctx context.Context, jsonnetSource *extensionv1beta1.JsonnetSource,
 	patchHelper *patch.Helper) error {
 
 	return patchHelper.Patch(
