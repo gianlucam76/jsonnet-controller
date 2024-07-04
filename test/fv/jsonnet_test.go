@@ -26,7 +26,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	extensionv1alpha1 "github.com/gianlucam76/jsonnet-controller/api/v1alpha1"
+	extensionv1beta1 "github.com/gianlucam76/jsonnet-controller/api/v1beta1"
 )
 
 // ConfigMap jsonnet contains
@@ -114,12 +114,12 @@ func verifyJsonnetSourceWithConfigMap(namePrefix, jsonnetConfigMapName, jsonnetF
 	Expect(ok).To(BeTrue())
 
 	Byf("Creating a JsonnetSource referencing this ConfigMap")
-	jsonnetSource := &extensionv1alpha1.JsonnetSource{
+	jsonnetSource := &extensionv1beta1.JsonnetSource{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      namePrefix + randomString(),
 			Namespace: randomString(),
 		},
-		Spec: extensionv1alpha1.JsonnetSourceSpec{
+		Spec: extensionv1beta1.JsonnetSourceSpec{
 			Namespace: jsonnetConfigMap.Namespace,
 			Name:      jsonnetConfigMap.Name,
 			Kind:      configMapKind,
@@ -143,7 +143,7 @@ func verifyJsonnetSourceWithConfigMap(namePrefix, jsonnetConfigMapName, jsonnetF
 
 	Byf("Verifying JsonnetSource %s/%s Status", jsonnetSource.Namespace, jsonnetSource.Name)
 	Eventually(func() bool {
-		currentJsonnetSource := &extensionv1alpha1.JsonnetSource{}
+		currentJsonnetSource := &extensionv1beta1.JsonnetSource{}
 		err := k8sClient.Get(context.TODO(),
 			types.NamespacedName{Namespace: jsonnetSource.Namespace, Name: jsonnetSource.Name},
 			currentJsonnetSource)
@@ -161,7 +161,7 @@ func verifyJsonnetSourceWithConfigMap(namePrefix, jsonnetConfigMapName, jsonnetF
 
 	Byf("Verifying JsonnetSource %s/%s Status.Resources", jsonnetSource.Namespace, jsonnetSource.Name)
 
-	currentJsonnetSource := &extensionv1alpha1.JsonnetSource{}
+	currentJsonnetSource := &extensionv1beta1.JsonnetSource{}
 	Expect(k8sClient.Get(context.TODO(),
 		types.NamespacedName{Namespace: jsonnetSource.Namespace, Name: jsonnetSource.Name},
 		currentJsonnetSource)).To(Succeed())
