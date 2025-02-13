@@ -416,7 +416,7 @@ spec:
         - --v=5
         command:
         - /manager
-        image: projectsveltos/jsonnet-controller:main
+        image: projectsveltos/jsonnet-controller:v0.6.0
         livenessProbe:
           httpGet:
             path: /healthz
