@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2/textlogger"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -111,7 +112,7 @@ func (r *JsonnetSourceReconciler) requeueJsonnetSourceForFluxSource(
 	for i := range consumers {
 		logger.V(logs.LogDebug).Info(fmt.Sprintf("requeue consumer: %s", consumers[i]))
 		requests[i] = ctrl.Request{
-			NamespacedName: client.ObjectKey{
+			NamespacedName: types.NamespacedName{
 				Name:      consumers[i].Name,
 				Namespace: consumers[i].Namespace,
 			},
@@ -171,7 +172,7 @@ func (r *JsonnetSourceReconciler) requeueJsonnetSourceForReference(
 	for i := range consumers {
 		logger.V(logs.LogDebug).Info(fmt.Sprintf("requeue consumer: %s", consumers[i]))
 		requests[i] = ctrl.Request{
-			NamespacedName: client.ObjectKey{
+			NamespacedName: types.NamespacedName{
 				Name:      consumers[i].Name,
 				Namespace: consumers[i].Namespace,
 			},
